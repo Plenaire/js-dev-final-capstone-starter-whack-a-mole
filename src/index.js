@@ -8,7 +8,7 @@ const timerDisplay = document.querySelector('timer');
 const difficultyButtons = document.querySelectorAll('.difficulty');
 
 // Music and Sound
-const basePath = 'https://jpaktoon.github.io/whack-a-ghost';
+const basePath = 'https://plenaire.github.io/';
 const audioHit = new Audio(`${basePath}/assets/hitEffect.mp3`);
 const song = new Audio(`${basePath}/assets/moguri.mp3`);
 const endsong = new Audio(`${basePath}/assets/gameOver.mp3`);
