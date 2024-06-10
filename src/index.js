@@ -15,8 +15,6 @@ const gameOverSong = new Audio(`${basePath}/assets/gameOver.mp3`);
 
 let time = 0;
 let timer;
-let gameStopped;
-let timeoutId;
 let lastHole = 0;
 let points = 0;
 let difficulty = "normal";
@@ -74,8 +72,8 @@ function setDelay(difficulty) {
  * chooseHole(holes) //> returns one of the 9 holes that you defined
  */
 function chooseHole(holes) {
-    let index = randomInteger(0, 8); // Generates a random integer from 0 to 8 and assign it to an index variable.
-    let hole = holes[index]; // Gets a random hole with the random index (e.g., const hole = holes[index])
+    const index = randomInteger(0, 8); // Generates a random integer from 0 to 8 and assign it to an index variable.
+    const hole = holes[index]; // Gets a random hole with the random index (e.g., const hole = holes[index])
     if (hole === lastHole) {
         chooseHole(holes); // If hole === lastHole, then call chooseHole(holes) again because you don't want to return the same hole
     } else {
@@ -98,10 +96,10 @@ function chooseHole(holes) {
  */
 function gameOver() {
     if (time > 0) {
-        timeoutId = showUp();
+        const timeoutId = showUp();
         return timeoutId;
     } else {
-        gameStopped = stopGame();
+        const gameStopped = stopGame();
         return gameStopped;
     }
 }
@@ -133,7 +131,7 @@ function showAndHide(hole, delay){
     // Calls upon the toggleVisibility to add the 'show' class
     toggleVisibility(hole);
 
-    timeoutID = setTimeout(() => {
+    const timeoutID = setTimeout(() => {
         // Calls upon the toggleVisibility to remove the 'show' class when the timer runs out
         toggleVisibility(hole);
         gameOver();
@@ -147,11 +145,12 @@ function showAndHide(hole, delay){
  * a given hole. It returns the hole.
  * The code is updated so that it will not error if the user clicks at the same time that the visibility is toggled.
  */
-function toggleVisibility(element) {
-    if (element) {
-        element.classList.toggle('show');
+function toggleVisibility(hole) {
+    if (hole) {
+        hole.classList.toggle("show");
+        return hole;
     } else {
-        console.error('Invalid element passed to toggleVisibility');
+        console.log("Invalid element passed to toggleVisibility");
     }
 }
 
@@ -196,7 +195,7 @@ function updateTimer() {
     }
 
     // Apply styles based on the remaining time
-    if (time < 6) {
+    if (time < 4) {
         alertTimer();
     } else {
         normalTimer();
@@ -236,7 +235,7 @@ function startTimer() {
  * the moles.
  *
  */
-function whack() {
+function whack(event) {
     playAudio(audioHit);
     updateScore();
     return points;
@@ -246,7 +245,7 @@ function whack() {
  *
  * Adds the 'click' event listeners to the moles. See the instructions
  * for an example on how to set event listeners using a for loop.
- * 
+ *
  */
 function setEventListeners() {
     // forEach mole, add the whack event handler when the player clicks on the mole.
@@ -303,9 +302,9 @@ function enableButtons() {
 }
 
 /**
- * 
+ *
  * The following Disables the buttons so the game can be played without mis-clicking
- * 
+ *
  */
 function disableButtons() {
     startButton.disabled = true; // Disable the start button
@@ -318,9 +317,9 @@ function disableButtons() {
 
 
 /**
- * 
+ *
  * This sets the default difficulty button to active
- * 
+ *
  */
 function setDefaultDifficulty() {
     // Find the default button
@@ -333,9 +332,9 @@ function setDefaultDifficulty() {
 }
 
 /**
- * 
+ *
  * This sets the click event listener to all the difficulty buttons
- * 
+ *
  */
 function setDifficultyEventListeners() {
     // Add event listener to each button
@@ -355,18 +354,18 @@ function setDifficultyEventListeners() {
 }
 
 /**
- * 
+ *
  * Play Audio
- * 
+ *
  */
 function playAudio(audioObject) {
     audioObject.play().catch(() => {});
 }
 
 /**
- * 
+ *
  * Loop Audio for the theme song
- * 
+ *
  * */
 function playLoopedAudio(audioObject) {
     audioObject.loop = true;
