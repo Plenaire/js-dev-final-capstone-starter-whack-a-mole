@@ -1,15 +1,23 @@
+// Query Selectors
+
 const holes = document.querySelectorAll('.hole');
 const moles = document.querySelectorAll('.mole');
 const startButton = document.querySelector('#start');
-// TODO: Add the missing query selectors:
-const score; // Use querySelector() to get the score element
-const timerDisplay; // use querySelector() to get the timer element.
+const score=  document.querySelector('score');
+const timerDisplay = document.querySelector('timer');
+const difficultyButtons = document.querySelectorAll('.difficulty');
+
+// Music and Sound
+const basePath = 'https://jpaktoon.github.io/whack-a-ghost';
+const audioHit = new Audio(`${basePath}/assets/hitEffect.mp3`);
+const song = new Audio(`${basePath}/assets/moguri.mp3`);
+const endsong = new Audio(`${basePath}/assets/gameOver.mp3`);
 
 let time = 0;
 let timer;
 let lastHole = 0;
 let points = 0;
-let difficulty = "hard";
+let difficulty = "normal";
 
 /**
  * Generates a random integer within a range.
@@ -21,7 +29,7 @@ let difficulty = "hard";
  *
  */
 function randomInteger(min, max) {
-  // return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
@@ -40,8 +48,13 @@ function randomInteger(min, max) {
  *
  */
 function setDelay(difficulty) {
-  // TODO: Write your code here.
-  
+  if (difficulty === "easy") {
+      return 1500;
+  } else if (difficulty === "normal") {
+      return 1000;
+  } else if (difficulty === "hard") {
+      return randomInteger(600, 1200);
+  }
 }
 
 /**
@@ -59,8 +72,45 @@ function setDelay(difficulty) {
  * chooseHole(holes) //> returns one of the 9 holes that you defined
  */
 function chooseHole(holes) {
-  // TODO: Write your code here.
+    let index = randomInteger(0, 8); // Generates a random integer from 0 to 8 and assign it to an index variable.
+    let hole = holes[index]; // Gets a random hole with the random index (e.g., const hole = holes[index])
+    if (hole === lastHole) {
+        chooseHole(holes); // If hole === lastHole, then call chooseHole(holes) again because you don't want to return the same hole
+    } else {
+        lastHole = hole; // If hole is not the same as the lastHole, then keep track of it (lastHole = hole) and return the hole
+        return hole;
+    }
 
+}
+
+/**
+ * The following Disables the buttons so the game can be played without misclicking
+ */
+function disableButtons() {
+    // Disable the start button
+    startButton.disabled = true;
+
+
+    difficultyButtons.forEach(button => {
+        // Disable all difficulty buttons
+        button.disabled = true;
+    });
+}
+
+/**
+ *
+ * This function is called after the game stops
+ * Afterward, the user can replay the game.
+ *
+ */
+function enableButtons() {
+    // Enable the start button
+    startButton.disabled = false;
+
+    // Disable all difficulty buttons
+    difficultyButtons.forEach(button => {
+        button.disabled = false;
+    });
 }
 
 /**
@@ -84,8 +134,13 @@ function chooseHole(holes) {
 *
 */
 function gameOver() {
-  // TODO: Write your code here
-  
+    if (time > 0) {
+        const timeoutId = showUp();
+        return timeoutId;
+    } else {
+        const gameStopped = stopGame();
+        return gameStopped;
+    }
 }
 
 /**
@@ -97,9 +152,43 @@ function gameOver() {
 * to call `showAndHide(hole, delay)`.
 *
 */
+
+/**
+ * This sets the default difficulty button to active
+ */
+function setDefaultDifficulty() {
+    // Find the default button
+    const defaultButton = Array.from(difficultyButtons).find(
+        (btn) => btn.dataset.difficulty === difficulty
+    );
+
+    // Add the 'active' class to the "Normal" button
+    defaultButton.classList.add("active");
+}
+
+/**
+ * This sets the click event listener to all the difficulty buttons
+ */
+function setDifficultyEventListeners() {
+    // Add event listener to each button
+    difficultyButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            // Remove the 'active' class from all buttons
+            difficultyButtons.forEach((btn) => btn.classList.remove("active"));
+
+            // Add the 'active' class to the clicked button
+            button.classList.add("active");
+
+            // Get the data-difficulty value of the clicked button
+            // and set the global difficulty
+            difficulty = button.dataset.difficulty;
+        });
+    });
+}
+
 function showUp() {
-  let delay = 0; // TODO: Update so that it uses setDelay()
-  const hole = 0;  // TODO: Update so that it use chooseHole()
+  let delay = setDelay(difficulty); // Updates so that it uses setDelay()
+  const hole = chooseHole(holes);  // Updates so that it uses chooseHole()
   return showAndHide(hole, delay);
 }
 
@@ -112,13 +201,14 @@ function showUp() {
 *
 */
 function showAndHide(hole, delay){
-  // TODO: call the toggleVisibility function so that it adds the 'show' class.
+    // Calls upon the toggleVisibility to add the 'show' class
+    toggleVisibility(hole);
   
   const timeoutID = setTimeout(() => {
-    // TODO: call the toggleVisibility function so that it removes the 'show' class when the timer times out.
-    
-    gameOver();
-  }, 0); // TODO: change the setTimeout delay to the one provided as a parameter
+      // Calls upon the toggleVisibility to remove the 'show' class when the timer runs out
+      toggleVisibility(hole);
+      gameOver();
+  }, delay);
   return timeoutID;
 }
 
@@ -129,9 +219,8 @@ function showAndHide(hole, delay){
 *
 */
 function toggleVisibility(hole){
-  // TODO: add hole.classList.toggle so that it adds or removes the 'show' class.
-  
-  return hole;
+    hole.classList.toggle("show");
+    return hole;
 }
 
 /**
@@ -145,9 +234,9 @@ function toggleVisibility(hole){
 *
 */
 function updateScore() {
-  // TODO: Write your code here
-
-  return points;
+    points++; // Increment the points global variable by 1 point
+    score.textContent = points; // Update score.textContent with points.
+    return points;
 }
 
 /**
@@ -158,10 +247,9 @@ function updateScore() {
 *
 */
 function clearScore() {
-  // TODO: Write your code here
-  // points = 0;
-  // score.textContent = points;
-  return points;
+    points = 0; // Sets the variable to 0
+    score.textContent = points; // Update score.textContent with reset points.
+    return points;
 }
 
 /**
@@ -170,10 +258,31 @@ function clearScore() {
 *
 */
 function updateTimer() {
-  // TODO: Write your code here.
-  // hint: this code is provided to you in the instructions.
-  
-  return time;
+    if (time > 0) {
+        time -= 1;
+        timerDisplay.textContent = time;
+    }
+
+    // Apply styles based on the remaining time
+    if (time < 4) {
+        alertTimer();
+    } else {
+        normalTimer();
+    }
+
+    return time;
+}
+
+function normalTimer() {
+    // White with no animation
+    timerDisplay.style.color = 'white';
+    timerDisplay.style.animation = 'none';
+}
+
+function alertTimer() {
+    // Makes the timer blink
+    timerDisplay.style.color = 'red';
+    timerDisplay.style.animation = 'blink 1s infinite';
 }
 
 /**
@@ -183,9 +292,8 @@ function updateTimer() {
 *
 */
 function startTimer() {
-  // TODO: Write your code here
-  // timer = setInterval(updateTimer, 1000);
-  return timer;
+    timer = setInterval(updateTimer, 1000);
+    return timer;
 }
 
 /**
@@ -197,9 +305,9 @@ function startTimer() {
 *
 */
 function whack(event) {
-  // TODO: Write your code here.
-  // call updateScore()
-  return points;
+    playAudio(audioHit);
+    updateScore();
+    return points;
 }
 
 /**
@@ -207,10 +315,11 @@ function whack(event) {
 * Adds the 'click' event listeners to the moles. See the instructions
 * for an example on how to set event listeners using a for loop.
 */
-function setEventListeners(){
-  // TODO: Write your code here
+function setEventListeners() {
+    // forEach mole, add the whack event handler when the player clicks on the mole.
+    moles.forEach((mole) => mole.addEventListener("click", whack));
 
-  return moles;
+    return moles;
 }
 
 /**
@@ -231,9 +340,11 @@ function setDuration(duration) {
 *
 */
 function stopGame(){
-  // stopAudio(song);  //optional
-  clearInterval(timer);
-  return "game stopped";
+    stopAudio(song);  // Stops the normal game music song
+    playAudio(endsong); // Plays the gameover song
+    clearInterval(timer); // clears the timer interval
+    enableButtons(); // Enables the start button
+    return "game stopped";
 }
 
 /**
@@ -243,10 +354,19 @@ function stopGame(){
 *
 */
 function startGame(){
-  //setDuration(10);
-  //showUp();
+    clearScore(); // Clears previous/current score
+    setEventListeners(); // Sets the event listeners for the moles
+    startTimer(); // Starts the timer
+    setDuration(10); // Sets the duration
+    playLoopedAudio(song); // Starts the audio loop
+    disableButtons(); // Disable start button
+    showUp(); // Game starts
+
   return "game started";
 }
+
+setDefaultDifficulty();
+setDifficultyEventListeners();
 
 startButton.addEventListener("click", startGame);
 
