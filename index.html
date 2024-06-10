@@ -1,13 +1,29 @@
 <html>
   <head>
-    <link rel="stylesheet" href="./src/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moguri Tataki</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Jaro&display=swap"
+            rel="stylesheet"
+    />
   </head>
   <body>
-    <h1></h1>
+    <h1 id="title">Moguri Tataki!!</h1>
     <div>
       <div>
-        <h2>Click start to play!</h2>
+        <!-- Here is where the difficulty selection and start button will go -->
+        <h2>
+          <p>Mode</p>
+          <button id="easy" class="difficulty" data-difficulty="easy">Easy</button>
+          <button id="normal" class="difficulty" data-difficulty="normal">Normal</button>
+          <button id="hard" class="difficulty" data-difficulty="hard">Hyper Mode</button>
+        </h2>
       </div>
+      <div>Click <button id="start">Start</button> to play!</div>
       <div>
         <h2>score: <span id="score">0</span></h2>
       </div>
@@ -15,6 +31,7 @@
           <h2><span id="timer">0</span> seconds left.</h2>
       </div>
     </div>
+    <!-- The following is where the 3x3 board is laid out -->
     <div class="grid">
       <div id="hole0" class="hole">
         <div id="mole0" class="mole"></div>
@@ -22,7 +39,27 @@
       <div id="hole1" class="hole">
         <div id="mole1" class="mole"></div>
       </div>
-      <!--TODO: Add the missing holes and moles. -->
+      <div id="hole2" class="hole">
+        <div id="mole2" class="mole"></div>
+      </div>
+      <div id="hole3" class="hole">
+        <div id="mole3" class="mole"></div>
+      </div>
+      <div id="hole4" class="hole">
+        <div id="mole4" class="mole"></div>
+      </div>
+      <div id="hole5" class="hole">
+        <div id="mole5" class="mole"></div>
+      </div>
+      <div id="hole6" class="hole">
+        <div id="mole6" class="mole"></div>
+      </div>
+      <div id="hole7" class="hole">
+        <div id="mole7" class="mole"></div>
+      </div>
+      <div id="hole8" class="hole">
+        <div id="mole8" class="mole"></div>
+      </div>
     </div>
     <script src="./src/index.js"></script>
   </body>
