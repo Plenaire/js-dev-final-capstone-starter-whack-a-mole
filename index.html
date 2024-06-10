@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,10 @@
             href="https://fonts.googleapis.com/css2?family=Jaro&display=swap"
             rel="stylesheet"
     />
+    <link
+            href="https://fonts.googleapis.com/css2?family=Play&display=swap"
+            rel="stylesheet"
+    />
     <title>Moguri Tataki</title>
   </head>
   <body>
@@ -17,11 +21,11 @@
       <div>
         <!-- Here is where the difficulty selection and start button will go -->
         <h2>
-          <p>Mode Select</p>
+          <span id="modeSelect">Mode Select</span><br>
           <button id="easy" class="difficulty" data-difficulty="easy">Easy</button>
           <button id="normal" class="difficulty" data-difficulty="normal">Normal</button>
-          <button id="hard" class="difficulty" data-difficulty="hard">Hyper Mode</button></br>
-          Click <button id="start">Start</button> to play!
+          <button id="hard" class="difficulty" data-difficulty="hard">Hyper Mode</button><br>
+          <span id="clickStart">Click <button id="start">Start</button> to play!</span>
         </h2>
       </div>
       <div>
