@@ -3,18 +3,20 @@
 const holes = document.querySelectorAll('.hole');
 const moles = document.querySelectorAll('.mole');
 const startButton = document.querySelector('#start');
-const score=  document.querySelector('score');
-const timerDisplay = document.querySelector('timer');
+const score=  document.querySelector('#score');
+const timerDisplay = document.querySelector('#timer');
 const difficultyButtons = document.querySelectorAll('.difficulty');
 
 // Music and Sound
 const basePath = 'https://plenaire.github.io/js-dev-final-capstone-starter-whack-a-mole/';
 const audioHit = new Audio(`${basePath}/assets/hitEffect.mp3`);
 const song = new Audio(`${basePath}/assets/moguri.mp3`);
-const endsong = new Audio(`${basePath}/assets/gameOver.mp3`);
+const gameOverSong = new Audio(`${basePath}/assets/gameOver.mp3`);
 
 let time = 0;
 let timer;
+let gameStopped;
+let timeoutId;
 let lastHole = 0;
 let points = 0;
 let difficulty = "normal";
@@ -80,21 +82,208 @@ function chooseHole(holes) {
         lastHole = hole; // If hole is not the same as the lastHole, then keep track of it (lastHole = hole) and return the hole
         return hole;
     }
-
 }
 
 /**
- * The following Disables the buttons so the game can be played without misclicking
+ *
+ * Calls the showUp function if time > 0 and stops the game if time = 0.
+ *
+ * The purpose of this function is simply to determine if the game should
+ * continue or stop. The game continues if there is still time `if(time > 0)`.
+ * If there is still time then `showUp()` needs to be called again so that
+ * it sets a different delay and a different hole. If there is no more time
+ * then it should call the `stopGame()` function. The function also needs to
+ * return the timeoutId if the game continues or the string "game stopped"
+ * if the game is over.
  */
-function disableButtons() {
-    // Disable the start button
-    startButton.disabled = true;
+function gameOver() {
+    if (time > 0) {
+        timeoutId = showUp();
+        return timeoutId;
+    } else {
+        gameStopped = stopGame();
+        return gameStopped;
+    }
+}
 
+/**
+ *
+ * Calls the showAndHide() function with a specific delay and a hole.
+ *
+ * This function simply calls the `showAndHide` function with a specific
+ * delay and hole. The function needs to call `setDelay()` and `chooseHole()`
+ * to call `showAndHide(hole, delay)`.
+ *
+ */
+function showUp() {
+    let delay = setDelay(difficulty); // Updates so that it uses setDelay()
+    const hole = chooseHole(holes);  // Updates so that it uses chooseHole()
+    return showAndHide(hole, delay);
+}
 
-    difficultyButtons.forEach(button => {
-        // Disable all difficulty buttons
-        button.disabled = true;
-    });
+/**
+ *
+ * The purpose of this function is to show and hide the mole given
+ * a delay time and the hole where the mole is hidden. The function calls
+ * `toggleVisibility` to show or hide the mole. The function should return
+ * the timeoutID
+ *
+ */
+function showAndHide(hole, delay){
+    // Calls upon the toggleVisibility to add the 'show' class
+    toggleVisibility(hole);
+
+    timeoutID = setTimeout(() => {
+        // Calls upon the toggleVisibility to remove the 'show' class when the timer runs out
+        toggleVisibility(hole);
+        gameOver();
+    }, delay);
+    return timeoutID;
+}
+
+/**
+ *
+ * Adds or removes the 'show' class that is defined in styles.css to
+ * a given hole. It returns the hole.
+ * The code is updated so that it will not error if the user clicks at the same time that the visibility is toggled.
+ */
+function toggleVisibility(element) {
+    if (element) {
+        element.classList.toggle('show');
+    } else {
+        console.error('Invalid element passed to toggleVisibility');
+    }
+}
+
+/**
+ *
+ * This function increments the points global variable and updates the scoreboard.
+ * Use the `points` global variable that is already defined and increment it by 1.
+ * After the `points` variable is incremented proceed by updating the scoreboard
+ * that you defined in the `index.html` file. To update the scoreboard you can use
+ * `score.textContent = points;`. Use the comments in the function as a guide
+ * for your implementation:
+ *
+ */
+function updateScore() {
+    points++; // Increment the points global variable by 1 point
+    score.textContent = points; // Update score.textContent with points.
+    return points;
+}
+
+/**
+ *
+ * This function clears the score by setting `points = 0`. It also updates
+ * the board using `score.textContent = points`. The function should return
+ * the points.
+ *
+ */
+function clearScore() {
+    points = 0; // Sets the variable to 0
+    score.textContent = points; // Update score.textContent with reset points.
+    return points;
+}
+
+/**
+ *
+ * Updates the control board with the timer if time > 0
+ *
+ */
+function updateTimer() {
+    if (time > 0) {
+        time -= 1;
+        timerDisplay.textContent = time;
+    }
+
+    // Apply styles based on the remaining time
+    if (time < 6) {
+        alertTimer();
+    } else {
+        normalTimer();
+    }
+
+    return time;
+}
+
+function normalTimer() {
+    // White with no animation
+    timerDisplay.style.color = 'white';
+    timerDisplay.style.animation = 'none';
+}
+
+function alertTimer() {
+    // Makes the timer blink red
+    timerDisplay.style.color = 'red';
+    timerDisplay.style.animation = 'blink 1s infinite';
+}
+
+/**
+ *
+ * Starts the timer using setInterval. For each 1000ms (1 second)
+ * the updateTimer function get called. This function is already implemented
+ *
+ */
+function startTimer() {
+    timer = setInterval(updateTimer, 1000);
+    return timer;
+}
+
+/**
+ *
+ * This is the event handler that gets called when a player
+ * clicks on a mole. The setEventListeners should use this event
+ * handler (e.g. mole.addEventListener('click', whack)) for each of
+ * the moles.
+ *
+ */
+function whack() {
+    playAudio(audioHit);
+    updateScore();
+    return points;
+}
+
+/**
+ *
+ * Adds the 'click' event listeners to the moles. See the instructions
+ * for an example on how to set event listeners using a for loop.
+ * 
+ */
+function setEventListeners() {
+    // forEach mole, add the whack event handler when the player clicks on the mole.
+    moles.forEach((mole) => mole.addEventListener("click", whack));
+
+    return moles;
+}
+
+/**
+ *
+ * This function sets the duration of the game. The time limit, in seconds,
+ * that a player has to click on the sprites.
+ *
+ */
+function setDuration(duration) {
+    time = duration;
+    return time;
+}
+
+/**
+ *
+ * This function is called when the game is stopped. It clears the
+ * timer using clearInterval. Returns "game stopped".
+ *
+ */
+function stopGame(){
+    stopAudio(song);  // Stops the normal game music song
+
+    playAudio(gameOverSong); // Plays the game over song
+
+    normalTimer(); // Sets the timer to white with no animation
+
+    clearInterval(timer); // clears the timer interval
+
+    enableButtons(); // Enables the start button
+
+    return "game stopped";
 }
 
 /**
@@ -107,54 +296,31 @@ function enableButtons() {
     // Enable the start button
     startButton.disabled = false;
 
-    // Disable all difficulty buttons
+    // Enable all difficulty buttons
     difficultyButtons.forEach(button => {
         button.disabled = false;
     });
 }
 
 /**
-*
-* Calls the showUp function if time > 0 and stops the game if time = 0.
-*
-* The purpose of this function is simply to determine if the game should
-* continue or stop. The game continues if there is still time `if(time > 0)`.
-* If there is still time then `showUp()` needs to be called again so that
-* it sets a different delay and a different hole. If there is no more time
-* then it should call the `stopGame()` function. The function also needs to
-* return the timeoutId if the game continues or the string "game stopped"
-* if the game is over.
-*
-*  // if time > 0:
-*  //   timeoutId = showUp()
-*  //   return timeoutId
-*  // else
-*  //   gameStopped = stopGame()
-*  //   return gameStopped
-*
-*/
-function gameOver() {
-    if (time > 0) {
-        const timeoutId = showUp();
-        return timeoutId;
-    } else {
-        const gameStopped = stopGame();
-        return gameStopped;
-    }
+ * 
+ * The following Disables the buttons so the game can be played without mis-clicking
+ * 
+ */
+function disableButtons() {
+    startButton.disabled = true; // Disable the start button
+
+    difficultyButtons.forEach(button => {
+        button.disabled = true; // Disable all difficulty buttons
+    });
 }
 
-/**
-*
-* Calls the showAndHide() function with a specific delay and a hole.
-*
-* This function simply calls the `showAndHide` function with a specific
-* delay and hole. The function needs to call `setDelay()` and `chooseHole()`
-* to call `showAndHide(hole, delay)`.
-*
-*/
+
 
 /**
+ * 
  * This sets the default difficulty button to active
+ * 
  */
 function setDefaultDifficulty() {
     // Find the default button
@@ -167,7 +333,9 @@ function setDefaultDifficulty() {
 }
 
 /**
+ * 
  * This sets the click event listener to all the difficulty buttons
+ * 
  */
 function setDifficultyEventListeners() {
     // Add event listener to each button
@@ -186,165 +354,30 @@ function setDifficultyEventListeners() {
     });
 }
 
-function showUp() {
-  let delay = setDelay(difficulty); // Updates so that it uses setDelay()
-  const hole = chooseHole(holes);  // Updates so that it uses chooseHole()
-  return showAndHide(hole, delay);
+/**
+ * 
+ * Play Audio
+ * 
+ */
+function playAudio(audioObject) {
+    audioObject.play().catch(() => {});
 }
 
 /**
-*
-* The purpose of this function is to show and hide the mole given
-* a delay time and the hole where the mole is hidden. The function calls
-* `toggleVisibility` to show or hide the mole. The function should return
-* the timeoutID
-*
-*/
-function showAndHide(hole, delay){
-    // Calls upon the toggleVisibility to add the 'show' class
-    toggleVisibility(hole);
-  
-  const timeoutID = setTimeout(() => {
-      // Calls upon the toggleVisibility to remove the 'show' class when the timer runs out
-      toggleVisibility(hole);
-      gameOver();
-  }, delay);
-  return timeoutID;
+ * 
+ * Loop Audio for the theme song
+ * 
+ * */
+function playLoopedAudio(audioObject) {
+    audioObject.loop = true;
+    playAudio(audioObject);
 }
 
 /**
-*
-* Adds or removes the 'show' class that is defined in styles.css to 
-* a given hole. It returns the hole.
-*
-*/
-function toggleVisibility(hole){
-    hole.classList.toggle("show");
-    return hole;
-}
-
-/**
-*
-* This function increments the points global variable and updates the scoreboard.
-* Use the `points` global variable that is already defined and increment it by 1.
-* After the `points` variable is incremented proceed by updating the scoreboard
-* that you defined in the `index.html` file. To update the scoreboard you can use 
-* `score.textContent = points;`. Use the comments in the function as a guide 
-* for your implementation:
-*
-*/
-function updateScore() {
-    points++; // Increment the points global variable by 1 point
-    score.textContent = points; // Update score.textContent with points.
-    return points;
-}
-
-/**
-*
-* This function clears the score by setting `points = 0`. It also updates
-* the board using `score.textContent = points`. The function should return
-* the points.
-*
-*/
-function clearScore() {
-    points = 0; // Sets the variable to 0
-    score.textContent = points; // Update score.textContent with reset points.
-    return points;
-}
-
-/**
-*
-* Updates the control board with the timer if time > 0
-*
-*/
-function updateTimer() {
-    if (time > 0) {
-        time -= 1;
-        timerDisplay.textContent = time;
-    }
-
-    // Apply styles based on the remaining time
-    if (time < 4) {
-        alertTimer();
-    } else {
-        normalTimer();
-    }
-
-    return time;
-}
-
-function normalTimer() {
-    // White with no animation
-    timerDisplay.style.color = 'white';
-    timerDisplay.style.animation = 'none';
-}
-
-function alertTimer() {
-    // Makes the timer blink
-    timerDisplay.style.color = 'red';
-    timerDisplay.style.animation = 'blink 1s infinite';
-}
-
-/**
-*
-* Starts the timer using setInterval. For each 1000ms (1 second)
-* the updateTimer function get called. This function is already implemented
-*
-*/
-function startTimer() {
-    timer = setInterval(updateTimer, 1000);
-    return timer;
-}
-
-/**
-*
-* This is the event handler that gets called when a player
-* clicks on a mole. The setEventListeners should use this event
-* handler (e.g. mole.addEventListener('click', whack)) for each of
-* the moles.
-*
-*/
-function whack(event) {
-    playAudio(audioHit);
-    updateScore();
-    return points;
-}
-
-/**
-*
-* Adds the 'click' event listeners to the moles. See the instructions
-* for an example on how to set event listeners using a for loop.
-*/
-function setEventListeners() {
-    // forEach mole, add the whack event handler when the player clicks on the mole.
-    moles.forEach((mole) => mole.addEventListener("click", whack));
-
-    return moles;
-}
-
-/**
-*
-* This function sets the duration of the game. The time limit, in seconds,
-* that a player has to click on the sprites.
-*
-*/
-function setDuration(duration) {
-  time = duration;
-  return time;
-}
-
-/**
-*
-* This function is called when the game is stopped. It clears the
-* timer using clearInterval. Returns "game stopped".
-*
-*/
-function stopGame(){
-    stopAudio(song);  // Stops the normal game music song
-    playAudio(endsong); // Plays the gameover song
-    clearInterval(timer); // clears the timer interval
-    enableButtons(); // Enables the start button
-    return "game stopped";
+ * Stop Audio
+ */
+function stopAudio(audioObject) {
+    audioObject.pause();
 }
 
 /**
@@ -355,12 +388,12 @@ function stopGame(){
 */
 function startGame(){
     clearScore(); // Clears previous/current score
-    setEventListeners(); // Sets the event listeners for the moles
-    startTimer(); // Starts the timer
     setDuration(10); // Sets the duration
+    startTimer(); // Starts the timer
+    setEventListeners(); // Sets the event listeners for the moles
     playLoopedAudio(song); // Starts the audio loop
-    disableButtons(); // Disable start button
     showUp(); // Game starts
+    disableButtons(); // Disable start button
 
   return "game started";
 }
